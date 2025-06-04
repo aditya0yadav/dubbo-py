@@ -59,7 +59,6 @@ class UserServiceHandler:
         name = request_data["name"]
         age = request_data["age"]
         
-        # You can use the name and age parameters for filtering or processing
         user_list = [f"{user.name} ({user.age})" for user in self.users_db]
         return f"Hello {name} (age {age})! Users: {', '.join(user_list)}"
 
@@ -71,7 +70,6 @@ def build_service_handler():
         request_deserializer=request_deserializer,
         response_serializer=response_serializer,
     )
-    # build a service handler
     service_handler = RpcServiceHandler(
         service_name="org.apache.dubbo.samples.serialization.json",
         method_handlers=[method_handler],
@@ -80,11 +78,9 @@ def build_service_handler():
 
 
 if __name__ == "__main__":
-    # build server config
     service_handler = build_service_handler()
     service_config = ServiceConfig(service_handler=service_handler, host="127.0.0.1", port=50051)
 
-    # start the server
     server = dubbo.Server(service_config).start()
 
     input("Press Enter to stop the server...\n")
