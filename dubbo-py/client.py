@@ -1,5 +1,3 @@
-# Fixed Dubbo Client to match server serialization
-
 import orjson
 import dubbo
 from dubbo.configs import ReferenceConfig
