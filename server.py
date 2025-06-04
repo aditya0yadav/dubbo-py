@@ -1,3 +1,4 @@
+
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,14 +23,10 @@ from dubbo.configs import ServiceConfig
 from dubbo.proxy.handlers import RpcMethodHandler, RpcServiceHandler
 
 
-def request_deserializer(data: bytes) -> dict:
-    """Deserialize incoming request data from client"""
-    return orjson.loads(data)
-
-
-def response_serializer(message: str) -> bytes:
-    """Serialize response message to send back to client"""
-    return orjson.dumps({"message": message})
+# Pydantic models for request/response
+class UserRequest(BaseModel):
+    name: str
+    age: int
 
 
 class User(BaseModel):
@@ -43,6 +40,18 @@ class User(BaseModel):
 class UserListResponse(BaseModel):
     users: List[User]
     total_count: int
+    greeting: str
+
+
+def request_deserializer(data: bytes) -> UserRequest:
+    """Deserialize incoming request data from client to Pydantic object"""
+    json_data = orjson.loads(data)
+    return UserRequest(**json_data)
+
+
+def response_serializer(response: UserListResponse) -> bytes:
+    """Serialize Pydantic response object to send back to client"""
+    return orjson.dumps(response.model_dump())
 
 
 class UserServiceHandler:
@@ -52,15 +61,18 @@ class UserServiceHandler:
             User(id=2, name="Bob", email="bob@example.com", age=25),
         ]
     
-    def list_users(self, request_data: dict) -> str:
+    def list_users(self, request: UserRequest) -> UserListResponse:
         """
-        Updated to accept the deserialized request data as a single dict parameter
+        Updated to accept Pydantic UserRequest object and return Pydantic UserListResponse
         """
-        name = request_data["name"]
-        age = request_data["age"]
+        greeting = f"Hello {request.name} (age {request.age})!"
         
-        user_list = [f"{user.name} ({user.age})" for user in self.users_db]
-        return f"Hello {name} (age {age})! Users: {', '.join(user_list)}"
+        response = UserListResponse(
+            users=self.users_db,
+            total_count=len(self.users_db),
+            greeting=greeting
+        )
+        return response
 
 
 def build_service_handler():
