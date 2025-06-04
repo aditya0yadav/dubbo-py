@@ -55,6 +55,7 @@ def build_service_handler():
     print(type(service_handler))
     return service_handler
 
+
 if __name__ == "__main__":
     service_handler = build_service_handler()
     service_config = ServiceConfig(service_handler=service_handler, host="127.0.0.1", port=50051)
