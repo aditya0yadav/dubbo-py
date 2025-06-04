@@ -20,7 +20,6 @@ class Serializer:
     
 class GreeterServiceStub:
     def __init__(self, client: dubbo.Client):
-        # Fixed: Use correct serializer methods that match the server
         self.unary = client.unary(
             method_name="unary",
             request_serializer=Serializer.request_serializer,
@@ -39,7 +38,3 @@ if __name__ == "__main__":
     result = stub.say_hello("dubbo-python", 18)
     print(f"Server response: {result}")
 
-
-# FIXES MADE:
-# 1. Changed client request_serializer to use orjson.dumps() with dict format to match server expectations
-# 2. Changed client response_deserializer to parse JSON response from server
