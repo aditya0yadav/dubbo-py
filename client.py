@@ -4,7 +4,6 @@ import orjson
 import dubbo
 from dubbo.configs import ReferenceConfig
 
-
 class Serializer:
     @staticmethod
     def request_serializer(name: str, age: int) -> bytes:
@@ -20,7 +19,7 @@ class Serializer:
     
 class GreeterServiceStub:
     def __init__(self, client: dubbo.Client):
-        # Fixed: Use correct serializer methods that match the server
+
         self.unary = client.unary(
             method_name="unary",
             request_serializer=Serializer.request_serializer,
@@ -40,9 +39,3 @@ if __name__ == "__main__":
     print(f"Server response: {result}")
 
 
-# FIXES MADE:
-# 1. Changed client request_serializer to use orjson.dumps() with dict format to match server expectations
-# 2. Changed client response_deserializer to parse JSON response from server
-# 3. Server method now accepts name and age parameters as expected
-# 4. Fixed server's users_db reference issue by making it an instance variable
-# 5. Server method now returns a simple string message instead of complex object

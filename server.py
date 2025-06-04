@@ -47,7 +47,6 @@ class UserListResponse(BaseModel):
 
 class UserServiceHandler:
     def __init__(self):
-        # Fixed: Initialize users_db as instance variable
         self.users_db = [
             User(id=1, name="Alice", email="alice@example.com", age=30),
             User(id=2, name="Bob", email="bob@example.com", age=25),
@@ -66,7 +65,6 @@ class UserServiceHandler:
 
 
 def build_service_handler():
-    # build a method handler
     method_handler = RpcMethodHandler.unary(
         UserServiceHandler().list_users,
         method_name="unary",
