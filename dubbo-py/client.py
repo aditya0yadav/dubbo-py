@@ -43,6 +43,3 @@ if __name__ == "__main__":
 # FIXES MADE:
 # 1. Changed client request_serializer to use orjson.dumps() with dict format to match server expectations
 # 2. Changed client response_deserializer to parse JSON response from server
-# 3. Server method now accepts name and age parameters as expected
-# 4. Fixed server's users_db reference issue by making it an instance variable
-# 5. Server method now returns a simple string message instead of complex object
