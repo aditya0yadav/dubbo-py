@@ -25,7 +25,6 @@ class UserRequest(BaseModel):
     name: str
     age: int
 
-
 class User(BaseModel):
     id: int
     name: str
