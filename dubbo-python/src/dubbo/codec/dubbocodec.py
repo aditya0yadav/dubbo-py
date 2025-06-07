@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Type, Optional
+from typing import Any, Type, Optional, Callable
 from .codec import Codec
 from .CodecRegistry import CodecRegistry
 from pydantic import BaseModel
@@ -9,9 +9,16 @@ class DubboCodec:
 
     @staticmethod
     def init(codec_type: str = 'json', model_type: Optional[Type[BaseModel]] = None, **codec_kwargs):
-        if codec_type == 'json' and model_type is None:
-            raise ValueError("model_type is required when using JsonCodec")
-        DubboCodec._codec_instance = CodecRegistry.get_codec(codec_type, model_type=model_type, **codec_kwargs)
+        """Initialize codec with specified type and options"""
+        if model_type is None:
+            raise ValueError("model_type is required for all codecs")
+        
+        # Pass additional kwargs for specific codecs (like proto_class for protobuf)
+        DubboCodec._codec_instance = CodecRegistry.get_codec(
+            codec_type, 
+            model_type=model_type, 
+            **codec_kwargs
+        )
 
     @staticmethod
     def get_instance() -> Codec:
@@ -26,3 +33,26 @@ class DubboCodec:
     @staticmethod
     def decode(data: bytes) -> Any:
         return DubboCodec.get_instance().decode(data)
+
+    @staticmethod
+    def get_serializer_deserializer(
+        codec_type: str, 
+        request_model: Type[BaseModel] = None, 
+        response_model: Type[BaseModel] = None,
+        **codec_kwargs
+    ) -> tuple[Callable, Callable]:
+        """Get serializer and deserializer functions for RPC"""
+        
+        # Create request deserializer
+        request_codec = CodecRegistry.get_codec(codec_type, model_type=request_model, **codec_kwargs)
+        
+        # Create response serializer  
+        response_codec = CodecRegistry.get_codec(codec_type, model_type=response_model, **codec_kwargs)
+        
+        def request_deserializer(data: bytes):
+            return request_codec.decode(data)
+        
+        def response_serializer(response):
+            return response_codec.encode(response)
+        
+        return request_deserializer, response_serializer

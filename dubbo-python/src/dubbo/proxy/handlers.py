@@ -17,6 +17,7 @@
 from typing import Callable, Optional
 from .serializer import Serializer
 from dubbo.classes import MethodDescriptor
+from dubbo.codec import DubboCodec
 from dubbo.types import (
     DeserializingFunction,
     RpcTypes,
@@ -55,8 +56,9 @@ class RpcMethodHandler:
         cls,
         method: Callable,
         method_name: Optional[str] = None,
-        request_deserializer: Optional[DeserializingFunction] = Serializer.request_deserializer,
-        response_serializer: Optional[SerializingFunction] = Serializer.response_serializer,
+        request_deserializer: Optional[DeserializingFunction] = None,
+        response_serializer: Optional[SerializingFunction] = None,
+        codec_type="json"
     ) -> "RpcMethodHandler":
         """
         Create a unary method handler
@@ -71,6 +73,9 @@ class RpcMethodHandler:
         :return: the unary method handler.
         :rtype: RpcMethodHandler
         """
+        response_serializer,request_deserializer = DubboCodec.get_serializer_deserializer(
+            codec_type,
+        ) 
         return cls(
             MethodDescriptor(
                 callable_method=method,

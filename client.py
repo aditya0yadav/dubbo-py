@@ -1,20 +1,3 @@
-
-#
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import orjson
 import dubbo
 from dubbo.configs import ReferenceConfig
@@ -32,25 +15,30 @@ class User(BaseModel):
     age: Optional[int] = None
     is_active: bool = True
 
-
 class UserListResponse(BaseModel):
     users: List[User]
     total_count: int
     greeting: str
 
+# Simple serialization functions
+def pydantic_to_json(pydantic_obj: BaseModel) -> bytes:
+    """Convert Pydantic object to JSON bytes"""
+    return orjson.dumps(pydantic_obj.model_dump())
+
+def json_to_pydantic(json_data: bytes, model_class: type) -> BaseModel:
+    """Convert JSON bytes to Pydantic object"""
+    data = orjson.loads(json_data)
+    return model_class(**data)
+
 class Serializer:
     @staticmethod
     def request_serializer(request: UserRequest) -> bytes:
-        """Serialize Pydantic UserRequest object to JSON format"""
-        return orjson.dumps(request.model_dump())
+        return pydantic_to_json(request)
 
     @staticmethod
     def response_deserializer(data: bytes) -> UserListResponse:
-        """Deserialize response from server to Pydantic UserListResponse object"""
-        json_dict = orjson.loads(data)
-        return UserListResponse(**json_dict)
+        return json_to_pydantic(data, UserListResponse)
 
-    
 class GreeterServiceStub:
     def __init__(self, client: dubbo.Client):
         self.unary = client.unary(
@@ -60,10 +48,8 @@ class GreeterServiceStub:
         )
 
     def say_hello(self, name: str, age: int) -> UserListResponse:
-        """Create UserRequest object and send to server"""
         request = UserRequest(name=name, age=age)
         return self.unary(request)
-
 
 if __name__ == "__main__":
     reference_config = ReferenceConfig.from_url("tri://127.0.0.1:50051/org.apache.dubbo.samples.serialization.json")
@@ -72,9 +58,7 @@ if __name__ == "__main__":
     stub = GreeterServiceStub(dubbo_client)
     result = stub.say_hello("dubbo-python", 18)
     
-    print(f"Server response:")
     print(f"Greeting: {result.greeting}")
     print(f"Total users: {result.total_count}")
-    print("Users:")
     for user in result.users:
-        print(f"  - {user.name} ({user.email}), Age: {user.age}, Active: {user.is_active}")
+        print(f"  - {user.name} ({user.email}), Age: {user.age}")

@@ -3,6 +3,9 @@ from typing import Any, Type, Protocol, Callable, TypeVar, Generic
 import dubbo
 from functools import wraps
 from pydantic import BaseModel
+from typing import Any, Type, TypeVar, Generic
+from pydantic import BaseModel
+import orjson
 
 
 class Codec(ABC):
@@ -26,12 +29,10 @@ class EncodingFunction(Protocol):
 class DecodingFunction(Protocol):
     def __call__(self, data: bytes) -> Any: ...
 
-
 ModelT = TypeVar('ModelT', bound=BaseModel)
 
-
 class JsonCodec(Codec, Generic[ModelT]):
-    """Codec implementation for JSON and Pydantic models"""
+    """JSON codec for Pydantic models using orjson for performance"""
     
     def __init__(self, model_type: Type[ModelT]):
         self.model_type = model_type
@@ -41,17 +42,8 @@ class JsonCodec(Codec, Generic[ModelT]):
             data = self.model_type(**data)
         elif not isinstance(data, self.model_type):
             raise TypeError(f"Expected {self.model_type.__name__} or dict, got {type(data).__name__}")
-        return data.model_dump_json().encode('utf-8')
+        return orjson.dumps(data.model_dump())
 
     def decode(self, data: bytes) -> ModelT:
-        return self.model_type.model_validate_json(data.decode('utf-8'))
-
-    @classmethod
-    def create_encoder(cls, model_type: Type[ModelT]) -> EncodingFunction:
-        codec = cls(model_type)
-        return codec.encode
-
-    @classmethod
-    def create_decoder(cls, model_type: Type[ModelT]) -> DecodingFunction:
-        codec = cls(model_type)
-        return codec.decode
+        json_data = orjson.loads(data)
+        return self.model_type(**json_data)
