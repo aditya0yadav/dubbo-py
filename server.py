@@ -27,6 +27,8 @@ def setup_codec(codec_type: str = 'json'):
     else:
         request_deserializer, response_serializer = DubboCodec.get_serializer_deserializer(
             codec_type,
+            UserRequest,
+            UserListResponse
         )
         print(type(request_deserializer), type(response_serializer))
     return request_deserializer, response_serializer
@@ -51,7 +53,9 @@ def build_service_handler(codec_type: str = 'json'):
     method_handler = RpcMethodHandler.unary(
         UserServiceHandler().list_users,
         method_name="unary",
-        codec_type="json"
+        codec_type="json",
+        request_model = UserRequest,
+        response_model = UserListResponse
     )
     service_handler = RpcServiceHandler(
         service_name="org.apache.dubbo.samples.serialization.json",
