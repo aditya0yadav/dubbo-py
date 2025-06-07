@@ -49,7 +49,6 @@ class UserServiceHandler:
         )
 
 def build_service_handler(codec_type: str = 'json'):
-    request_deserializer, response_serializer = setup_codec(codec_type)
     method_handler = RpcMethodHandler.unary(
         UserServiceHandler().list_users,
         method_name="unary",
