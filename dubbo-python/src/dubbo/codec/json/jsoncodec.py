@@ -5,21 +5,8 @@ from functools import wraps
 from pydantic import BaseModel
 from typing import Any, Type, TypeVar, Generic
 from pydantic import BaseModel
+from dubbo.codec.codec import Codec
 import orjson
-
-
-class Codec(ABC):
-    """Abstract base class for all codecs"""
-    
-    @abstractmethod
-    def encode(self, data: Any) -> bytes:
-        """Encode data into bytes"""
-        pass
-
-    @abstractmethod
-    def decode(self, data: bytes) -> Any:
-        """Decode bytes into original data"""
-        pass
 
 
 class EncodingFunction(Protocol):
