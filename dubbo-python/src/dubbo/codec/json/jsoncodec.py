@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from dubbo.codec.codec import Codec
 import orjson
 
-
 class EncodingFunction(Protocol):
     def __call__(self, obj: Any) -> bytes: ...
 

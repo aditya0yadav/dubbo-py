@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import threading
 from typing import Optional
 
@@ -30,6 +31,7 @@ from dubbo.types import (
     RpcTypes,
     SerializingFunction,
 )
+from dubbo.codec import DubboCodec
 from dubbo.url import URL
 
 __all__ = ["Client"]
@@ -82,13 +84,30 @@ class Client:
             self._invoker = self._protocol.refer(self._url)
 
             self._initialized = True
+        
+    @staticmethod
+    def get_codec(**kwargs) -> tuple:
+        """
+        Get the method encode and decode
+        :return: tuple of the encode and decode method 
+        """
+        return DubboCodec.get_serializer_deserializer(**kwargs)
+
 
     def unary(
         self,
         method_name: str,
         request_serializer: Optional[SerializingFunction] = None,
         response_deserializer: Optional[DeserializingFunction] = None,
+        **kwargs
     ) -> RpcCallable:
+        
+        # Use custom serializers if provided, otherwise get from codec
+        if request_serializer is None or response_deserializer is None:
+            default_deserializer, default_serializer = self.get_codec(**kwargs)
+            request_serializer = request_serializer or default_serializer
+            response_deserializer = response_deserializer or default_deserializer
+        
         return self._callable(
             MethodDescriptor(
                 method_name=method_name,
@@ -103,7 +122,15 @@ class Client:
         method_name: str,
         request_serializer: Optional[SerializingFunction] = None,
         response_deserializer: Optional[DeserializingFunction] = None,
+        **kwargs
     ) -> RpcCallable:
+        
+        # Use custom serializers if provided, otherwise get from codec
+        if request_serializer is None or response_deserializer is None:
+            default_deserializer, default_serializer = self.get_codec(**kwargs)
+            request_serializer = request_serializer or default_serializer
+            response_deserializer = response_deserializer or default_deserializer
+        
         return self._callable(
             MethodDescriptor(
                 method_name=method_name,
@@ -118,7 +145,15 @@ class Client:
         method_name: str,
         request_serializer: Optional[SerializingFunction] = None,
         response_deserializer: Optional[DeserializingFunction] = None,
+        **kwargs
     ) -> RpcCallable:
+        
+        # Use custom serializers if provided, otherwise get from codec
+        if request_serializer is None or response_deserializer is None:
+            default_deserializer, default_serializer = self.get_codec(**kwargs)
+            request_serializer = request_serializer or default_serializer
+            response_deserializer = response_deserializer or default_deserializer
+        
         return self._callable(
             MethodDescriptor(
                 method_name=method_name,
@@ -133,7 +168,15 @@ class Client:
         method_name: str,
         request_serializer: Optional[SerializingFunction] = None,
         response_deserializer: Optional[DeserializingFunction] = None,
+        **kwargs
     ) -> RpcCallable:
+        
+        # Use custom serializers if provided, otherwise get from codec
+        if request_serializer is None or response_deserializer is None:
+            default_deserializer, default_serializer = self.get_codec(**kwargs)
+            request_serializer = request_serializer or default_serializer
+            response_deserializer = response_deserializer or default_deserializer
+        
         # create method descriptor
         return self._callable(
             MethodDescriptor(

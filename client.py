@@ -20,7 +20,6 @@ class UserListResponse(BaseModel):
     total_count: int
     greeting: str
 
-# Simple serialization functions
 def pydantic_to_json(pydantic_obj: BaseModel) -> bytes:
     """Convert Pydantic object to JSON bytes"""
     return orjson.dumps(pydantic_obj.model_dump())
@@ -43,8 +42,9 @@ class GreeterServiceStub:
     def __init__(self, client: dubbo.Client):
         self.unary = client.unary(
             method_name="unary",
-            request_serializer=Serializer.request_serializer,
-            response_deserializer=Serializer.response_deserializer
+            codec_type="json",
+            request_model = UserListResponse,
+            response_model = UserRequest
         )
 
     def say_hello(self, name: str, age: int) -> UserListResponse:

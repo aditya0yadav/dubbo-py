@@ -15,7 +15,6 @@
 # limitations under the License.
 
 from typing import Callable, Optional
-from .serializer import Serializer
 from dubbo.classes import MethodDescriptor
 from dubbo.codec import DubboCodec
 from dubbo.types import (
@@ -81,7 +80,12 @@ class RpcMethodHandler:
         :return: the unary method handler.
         :rtype: RpcMethodHandler
         """
-        request_deserializer, response_serializer = cls.get_codec(**kwargs)
+        # Use custom serializers if provided, otherwise get from codec
+        if request_deserializer is None or response_serializer is None:
+            default_deserializer, default_serializer = cls.get_codec(**kwargs)
+            request_deserializer = request_deserializer or default_deserializer
+            response_serializer = response_serializer or default_serializer
+            
         return cls(
             MethodDescriptor(
                 callable_method=method,
@@ -114,7 +118,12 @@ class RpcMethodHandler:
         :return: the client stream method handler.
         :rtype: RpcMethodHandler
         """
-        request_deserializer, response_serializer = cls.get_codec(**kwargs)
+        # Use custom serializers if provided, otherwise get from codec
+        if request_deserializer is None or response_serializer is None:
+            default_deserializer, default_serializer = cls.get_codec(**kwargs)
+            request_deserializer = request_deserializer or default_deserializer
+            response_serializer = response_serializer or default_serializer
+            
         return cls(
             MethodDescriptor(
                 callable_method=method,
@@ -147,7 +156,12 @@ class RpcMethodHandler:
         :return: the server stream method handler.
         :rtype: RpcMethodHandler
         """
-        request_deserializer, response_serializer = cls.get_codec(**kwargs)
+        # Use custom serializers if provided, otherwise get from codec
+        if request_deserializer is None or response_serializer is None:
+            default_deserializer, default_serializer = cls.get_codec(**kwargs)
+            request_deserializer = request_deserializer or default_deserializer
+            response_serializer = response_serializer or default_serializer
+            
         return cls(
             MethodDescriptor(
                 callable_method=method,
@@ -180,7 +194,12 @@ class RpcMethodHandler:
         :return: the bidi stream method handler.
         :rtype: RpcMethodHandler
         """
-        request_deserializer, response_serializer = cls.get_codec(**kwargs)
+        # Use custom serializers if provided, otherwise get from codec
+        if request_deserializer is None or response_serializer is None:
+            default_deserializer, default_serializer = cls.get_codec(**kwargs)
+            request_deserializer = request_deserializer or default_deserializer
+            response_serializer = response_serializer or default_serializer
+            
         return cls(
             MethodDescriptor(
                 callable_method=method,
