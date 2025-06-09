@@ -14,6 +14,7 @@ class User(BaseModel):
     email: str
     age: Optional[int] = None
     is_active: bool = True
+    
 
 class UserListResponse(BaseModel):
     users: List[User]
