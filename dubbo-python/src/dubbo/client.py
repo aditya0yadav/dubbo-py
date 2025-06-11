@@ -102,7 +102,6 @@ class Client:
         **kwargs
     ) -> RpcCallable:
         
-        # Use custom serializers if provided, otherwise get from codec
         if request_serializer is None or response_deserializer is None:
             default_deserializer, default_serializer = self.get_codec(**kwargs)
             request_serializer = request_serializer or default_serializer
@@ -130,6 +129,7 @@ class Client:
             default_deserializer, default_serializer = self.get_codec(**kwargs)
             request_serializer = request_serializer or default_serializer
             response_deserializer = response_deserializer or default_deserializer
+            print(type(request_serializer), type(response_deserializer))
         
         return self._callable(
             MethodDescriptor(

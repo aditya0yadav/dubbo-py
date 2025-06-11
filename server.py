@@ -4,6 +4,7 @@ import dubbo
 from dubbo.configs import ServiceConfig
 from dubbo.proxy.handlers import RpcMethodHandler, RpcServiceHandler
 from dubbo.codec import DubboCodec
+import orjson 
 
 class UserRequest(BaseModel):
     name: str
@@ -20,6 +21,8 @@ class UserListResponse(BaseModel):
     users: List[User]
     total_count: int
     greeting: str
+
+
 
 def setup_codec(codec_type: str = 'json'):
     if codec_type == 'protobuf':
@@ -49,6 +52,7 @@ class UserServiceHandler:
         )
 
 def build_service_handler(codec_type: str = 'json'):
+
     method_handler = RpcMethodHandler.unary(
         UserServiceHandler().list_users,
         method_name="unary",
@@ -65,6 +69,6 @@ def build_service_handler(codec_type: str = 'json'):
 if __name__ == "__main__":
     CODEC_TYPE = 'json'
     service_handler = build_service_handler(CODEC_TYPE)
-    service_config = ServiceConfig(service_handler=service_handler, host="127.0.0.1", port=50051)
+    service_config = ServiceConfig(service_handler=service_handler, host="127.0.0.1", port=50052)
     server = dubbo.Server(service_config).start()
     input(f"Server running with {CODEC_TYPE} codec. Press Enter to stop...\n")

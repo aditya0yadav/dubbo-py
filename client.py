@@ -14,30 +14,19 @@ class User(BaseModel):
     email: str
     age: Optional[int] = None
     is_active: bool = True
-    
+
+def request_serializer(name: str, age: int) -> bytes:
+    return orjson.dumps({"name": name, "age": age})
+
+def response_deserializer(data: bytes) -> str:
+    json_dict = orjson.loads(data)
+    return json_dict["message"]
+
 
 class UserListResponse(BaseModel):
     users: List[User]
     total_count: int
     greeting: str
-
-def pydantic_to_json(pydantic_obj: BaseModel) -> bytes:
-    """Convert Pydantic object to JSON bytes"""
-    return orjson.dumps(pydantic_obj.model_dump())
-
-def json_to_pydantic(json_data: bytes, model_class: type) -> BaseModel:
-    """Convert JSON bytes to Pydantic object"""
-    data = orjson.loads(json_data)
-    return model_class(**data)
-
-class Serializer:
-    @staticmethod
-    def request_serializer(request: UserRequest) -> bytes:
-        return pydantic_to_json(request)
-
-    @staticmethod
-    def response_deserializer(data: bytes) -> UserListResponse:
-        return json_to_pydantic(data, UserListResponse)
 
 class GreeterServiceStub:
     def __init__(self, client: dubbo.Client):
